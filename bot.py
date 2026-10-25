@@ -45,7 +45,10 @@ async def on_message(msg: discord.Message):
         try:
             texto = await asyncio.to_thread(
                 ia.responder, prompt or PROMPT_PADRAO, contexto, msg.clean_content)
+            db.registrar_uso(msg.guild.id, msg.author.id)
         except Exception:
+            import traceback
+            traceback.print_exc()
             texto = "Não consegui responder agora (limite da IA ou erro). Tente de novo em instantes."
     await msg.reply(texto[:1900])
 

@@ -23,11 +23,16 @@ def set_canais(guild_id, canais):
     con.commit()
 
 def pode_usar(guild_id, user_id, limite):
+    if limite <= 0:
+        return True
     dia = datetime.date.today().isoformat()
-    r = con.execute("SELECT qtd FROM uso WHERE guild_id=? AND user_id=? AND dia=?", (guild_id, user_id, dia)).fetchone()
-    if r and r[0] >= limite:
-        return False
+    r = con.execute("SELECT qtd FROM uso WHERE guild_id=? AND user_id=? AND dia=?",
+                    (guild_id, user_id, dia)).fetchone()
+    return not (r and r[0] >= limite)
+
+def registrar_uso(guild_id, user_id):
+    dia = datetime.date.today().isoformat()
     con.execute("""INSERT INTO uso VALUES(?,?,?,1)
-                   ON CONFLICT(guild_id,user_id,dia) DO UPDATE SET qtd=qtd+1""", (guild_id, user_id, dia))
+                   ON CONFLICT(guild_id,user_id,dia) DO UPDATE SET qtd=qtd+1""",
+                (guild_id, user_id, dia))
     con.commit()
-    return True
